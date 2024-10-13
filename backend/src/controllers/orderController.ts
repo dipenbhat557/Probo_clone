@@ -21,8 +21,12 @@ export const buyYesOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol].yes[price] = { total: 0, orders: {} };
   }
   ORDERBOOK[stockSymbol].yes[price].total += quantity;
-  ORDERBOOK[stockSymbol].yes[price].orders[userId] =
-    (ORDERBOOK[stockSymbol].yes[price].orders[userId] || 0) + quantity;
+  ORDERBOOK[stockSymbol].yes[price].orders[userId] = {
+    quantity:
+      (ORDERBOOK[stockSymbol].yes[price].orders[userId]?.quantity || 0) +
+      quantity,
+    orderType: "buy",
+  };
 
   initializeStockBalance(userId, stockSymbol);
 
@@ -54,8 +58,12 @@ export const buyNoOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol].no[price] = { total: 0, orders: {} };
   }
   ORDERBOOK[stockSymbol].no[price].total += quantity;
-  ORDERBOOK[stockSymbol].no[price].orders[userId] =
-    (ORDERBOOK[stockSymbol].no[price].orders[userId] || 0) + quantity;
+  ORDERBOOK[stockSymbol].no[price].orders[userId] = {
+    quantity:
+      (ORDERBOOK[stockSymbol].no[price].orders[userId]?.quantity || 0) +
+      quantity,
+    orderType: "buy",
+  };
 
   initializeStockBalance(userId, stockSymbol);
 
@@ -87,9 +95,12 @@ export const sellYesOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol].yes[price] = { total: 0, orders: {} };
   }
   ORDERBOOK[stockSymbol].yes[price].total += quantity;
-  ORDERBOOK[stockSymbol].yes[price].orders[userId] =
-    (ORDERBOOK[stockSymbol].yes[price].orders[userId] || 0) + quantity;
-
+  ORDERBOOK[stockSymbol].yes[price].orders[userId] = {
+    quantity:
+      (ORDERBOOK[stockSymbol].yes[price].orders[userId]?.quantity || 0) +
+      quantity,
+    orderType: "sell",
+  };
   return res.json({
     message: `Sell order for 'yes' added for ${stockSymbol}`,
     orderbook: ORDERBOOK[stockSymbol],
@@ -115,9 +126,12 @@ export const sellNoOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol].no[price] = { total: 0, orders: {} };
   }
   ORDERBOOK[stockSymbol].no[price].total += quantity;
-  ORDERBOOK[stockSymbol].no[price].orders[userId] =
-    (ORDERBOOK[stockSymbol].no[price].orders[userId] || 0) + quantity;
-
+  ORDERBOOK[stockSymbol].no[price].orders[userId] = {
+    quantity:
+      (ORDERBOOK[stockSymbol].no[price].orders[userId]?.quantity || 0) +
+      quantity,
+    orderType: "sell",
+  };
   return res.json({
     message: `Sell order for 'no' added for ${stockSymbol}`,
     orderbook: ORDERBOOK[stockSymbol],

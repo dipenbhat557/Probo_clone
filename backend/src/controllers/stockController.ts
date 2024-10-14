@@ -36,3 +36,9 @@ export const getIndividualStockBalance = (req: Request, res: Response) => {
     }
     res.json(stock);
 };
+
+// export const mintTrade = (req: Request, res: Response){
+//     const { userId, stockSymbol, quantity } = req.body;
+
+//     return res.json()
+// }

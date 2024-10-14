@@ -8,5 +8,6 @@ router.post('/buy/no',buyNoOption)
 router.post('/sell/yes',sellYesOption)
 router.post('/sell/no',sellNoOption)
 router.get('/orderbook', viewOrderbook);
+router.get('/orderbook/:stockSymbol',viewIndividualOrderbook)
 
 export default router;

@@ -12,6 +12,10 @@ export const createUser = (req: Request, res: Response) => {
 };
 
 export const getINRBalance = (req: Request, res: Response) => {
+    res.json({ INR_BALANCES });
+};
+
+export const getIndividualBalance = (req: Request, res: Response) => {
     const { userId } = req.params;
     const balance = INR_BALANCES[userId];
     if (!balance) {

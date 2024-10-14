@@ -3,7 +3,6 @@ import { INR_BALANCES, STOCK_BALANCES } from "../models/balances";
 import { ORDERBOOK } from "../models/orderbook";
 import { initializeStockBalance, validateOrder } from "../utils/validation";
 
-// Buy 'yes' option
 export const buyYesOption = (req: Request, res: Response): Response => {
   const { userId, stockSymbol, quantity, price } = req.body;
 
@@ -21,12 +20,8 @@ export const buyYesOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol].yes[price] = { total: 0, orders: {} };
   }
   ORDERBOOK[stockSymbol].yes[price].total += quantity;
-  ORDERBOOK[stockSymbol].yes[price].orders[userId] = {
-    quantity:
-      (ORDERBOOK[stockSymbol].yes[price].orders[userId]?.quantity || 0) +
-      quantity,
-    orderType: "buy",
-  };
+  ORDERBOOK[stockSymbol].yes[price].orders[userId] = 
+    (ORDERBOOK[stockSymbol].yes[price].orders[userId] || 0) + quantity;
 
   initializeStockBalance(userId, stockSymbol);
 
@@ -40,7 +35,6 @@ export const buyYesOption = (req: Request, res: Response): Response => {
   });
 };
 
-// Buy 'no' option
 export const buyNoOption = (req: Request, res: Response): Response => {
   const { userId, stockSymbol, quantity, price } = req.body;
 
@@ -58,12 +52,8 @@ export const buyNoOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol].no[price] = { total: 0, orders: {} };
   }
   ORDERBOOK[stockSymbol].no[price].total += quantity;
-  ORDERBOOK[stockSymbol].no[price].orders[userId] = {
-    quantity:
-      (ORDERBOOK[stockSymbol].no[price].orders[userId]?.quantity || 0) +
-      quantity,
-    orderType: "buy",
-  };
+  ORDERBOOK[stockSymbol].no[price].orders[userId] = 
+    (ORDERBOOK[stockSymbol].no[price].orders[userId] || 0) + quantity;
 
   initializeStockBalance(userId, stockSymbol);
 
@@ -77,7 +67,6 @@ export const buyNoOption = (req: Request, res: Response): Response => {
   });
 };
 
-// Sell 'yes' option
 export const sellYesOption = (req: Request, res: Response): Response => {
   const { userId, stockSymbol, quantity, price } = req.body;
 
@@ -95,19 +84,14 @@ export const sellYesOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol].yes[price] = { total: 0, orders: {} };
   }
   ORDERBOOK[stockSymbol].yes[price].total += quantity;
-  ORDERBOOK[stockSymbol].yes[price].orders[userId] = {
-    quantity:
-      (ORDERBOOK[stockSymbol].yes[price].orders[userId]?.quantity || 0) +
-      quantity,
-    orderType: "sell",
-  };
+  ORDERBOOK[stockSymbol].yes[price].orders[userId] = 
+    (ORDERBOOK[stockSymbol].yes[price].orders[userId] || 0) + quantity;
   return res.json({
     message: `Sell order for 'yes' added for ${stockSymbol}`,
     orderbook: ORDERBOOK[stockSymbol],
   });
 };
 
-// Sell 'no' option
 export const sellNoOption = (req: Request, res: Response): Response => {
   const { userId, stockSymbol, quantity, price } = req.body;
 
@@ -126,12 +110,8 @@ export const sellNoOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol].no[price] = { total: 0, orders: {} };
   }
   ORDERBOOK[stockSymbol].no[price].total += quantity;
-  ORDERBOOK[stockSymbol].no[price].orders[userId] = {
-    quantity:
-      (ORDERBOOK[stockSymbol].no[price].orders[userId]?.quantity || 0) +
-      quantity,
-    orderType: "sell",
-  };
+  ORDERBOOK[stockSymbol].yes[price].orders[userId] = 
+    (ORDERBOOK[stockSymbol].yes[price].orders[userId] || 0) + quantity;
   return res.json({
     message: `Sell order for 'no' added for ${stockSymbol}`,
     orderbook: ORDERBOOK[stockSymbol],
@@ -139,12 +119,5 @@ export const sellNoOption = (req: Request, res: Response): Response => {
 };
 
 export const viewOrderbook = (req: Request, res: Response): Response => {
-  const { stockSymbol } = req.params;
-  const orderbook = ORDERBOOK[stockSymbol];
-
-  if (!orderbook) {
-    return res.status(404).json({ error: "Orderbook not found for symbol" });
-  }
-
-  return res.json(orderbook);
+  return res.json(ORDERBOOK);
 };

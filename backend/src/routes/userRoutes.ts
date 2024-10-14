@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { createUser, getINRBalance, onrampINR } from '../controllers/userController';
+import { createUser, getIndividualBalance, getINRBalance, onrampINR } from '../controllers/userController';
 
 const router: Router = Router();
 
-router.get('/create/:userId', createUser);
-router.get('/balance/inr/:userId', getINRBalance);
+router.post('/create/:userId', createUser);
+router.get('/balances/inr', getINRBalance);
+router.get('/balance/inr/:userId', getIndividualBalance)
 router.post('/onramp/inr', onrampINR);
 
 export default router;

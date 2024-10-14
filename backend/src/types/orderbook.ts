@@ -1,11 +1,6 @@
-export interface Order {
-  quantity: number;
-  orderType: "buy" | "sell";
-}
-
 export interface OrderEntry {
   total: number;
-  orders: Record<string, Order>;
+  orders: Record<string, number>;
 }
 
 export interface Orderbook {

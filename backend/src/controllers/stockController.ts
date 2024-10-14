@@ -25,6 +25,10 @@ export const createSymbol = (req: Request, res: Response): Response => {
 
 
 export const getStockBalance = (req: Request, res: Response) => {
+    res.json(STOCK_BALANCES);
+};
+
+export const getIndividualStockBalance = (req: Request, res: Response) => {
     const { userId } = req.params;
     const stock = STOCK_BALANCES[userId];
     if (!stock) {

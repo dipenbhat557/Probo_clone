@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { buyNoOption, buyYesOption, sellNoOption, sellYesOption, viewOrderbook } from '../controllers/orderController';
+import { buyNoOption, buyYesOption, sellNoOption, sellYesOption, viewIndividualOrderbook, viewOrderbook } from '../controllers/orderController';
 
 const router: Router = Router();
 

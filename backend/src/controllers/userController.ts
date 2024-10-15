@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { INR_BALANCES } from '../models/balances';
+import { INR_BALANCES, STOCK_BALANCES } from '../models/balances';
 import { INRBalance } from '../types/balances';
+import { ORDERBOOK } from '../models/orderbook';
 
 export const createUser = (req: Request, res: Response) => {
     const { userId } = req.params;
@@ -32,3 +33,12 @@ export const onrampINR = (req: Request, res: Response) => {
     INR_BALANCES[userId].balance += amount;
     res.json({ message: `INR ${amount / 100} added to user ${userId}`, balance: INR_BALANCES[userId] });
 };
+
+
+export const resetAll = (req:Request, res:Response) => {
+    Object.assign(ORDERBOOK,{})
+    Object.assign(STOCK_BALANCES,{})
+    Object.assign(INR_BALANCES,{})
+
+    res.json({message:"Orderbook, stock balances and inr balances resetted successfully"})
+}

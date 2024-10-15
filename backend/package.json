@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@babel/preset-typescript": "^7.25.7",
     "@types/express": "^4.17.21",
     "@types/node": "^22.7.5",
     "cross-env": "^7.0.3",

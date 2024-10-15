@@ -30,9 +30,21 @@ const mintOppositeStock = (
   }
 };
 
-export const buyYesOption = (req: Request, res: Response): Response => {
-  const { userId, stockSymbol, quantity, price: originalPrice } = req.body;
+export const buyOption = (req: Request, res: Response) => {
+
+  const { userId, stockSymbol, quantity, price: originalPrice, stockType } = req.body;
+  
   const price = originalPrice / 100;
+
+  if(stockType == 'yes'){
+    return buyYesOption(userId, stockSymbol,quantity,price,res);
+  }else if(stockType == 'no'){
+    return buyNoOption(userId, stockSymbol,quantity,price,res);
+  }
+
+}
+
+export const buyYesOption = (userId:string,stockSymbol:string,quantity:number,price:number,res:Response): Response => {
 
   if (!validateOrder(userId, stockSymbol, quantity, price, INR_BALANCES)) {
     return res.status(400).json({ error: "Invalid order" });
@@ -114,9 +126,7 @@ export const buyYesOption = (req: Request, res: Response): Response => {
   });
 };
 
-export const buyNoOption = (req: Request, res: Response): Response => {
-  const { userId, stockSymbol, quantity, price: originalPrice } = req.body;
-  const price = originalPrice / 100;
+export const buyNoOption = (userId:string,stockSymbol:string,quantity:number,price:number,res:Response): Response => {
 
   if (!validateOrder(userId, stockSymbol, quantity, price, INR_BALANCES)) {
     return res.status(400).json({ error: "Invalid order" });
@@ -198,9 +208,18 @@ export const buyNoOption = (req: Request, res: Response): Response => {
   });
 };
 
-export const sellYesOption = (req: Request, res: Response): Response => {
-  const { userId, stockSymbol, quantity, price: originalPrice } = req.body;
+export const sellOption = (req: Request, res: Response) => {
+  const { userId, stockSymbol, quantity, price: originalPrice,stockType } = req.body;
   const price = originalPrice / 100;
+
+  if(stockType == 'yes'){
+    return sellYesOption(userId, stockSymbol,quantity,price,res);
+  }else if(stockType == 'no'){
+    return sellNoOption(userId, stockSymbol,quantity,price,res);
+  }
+}
+
+export const sellYesOption = (userId:string,stockSymbol:string,quantity:number,price:number,res:Response): Response => {
 
   if (STOCK_BALANCES[userId][stockSymbol]?.yes) {
     if (STOCK_BALANCES[userId]?.[stockSymbol]?.yes.quantity < quantity) {
@@ -224,9 +243,7 @@ export const sellYesOption = (req: Request, res: Response): Response => {
   });
 };
 
-export const sellNoOption = (req: Request, res: Response): Response => {
-  const { userId, stockSymbol, quantity, price: originalPrice } = req.body;
-  const price = originalPrice / 100;
+export const sellNoOption = (userId:string,stockSymbol:string,quantity:number,price:number,res:Response): Response => {
 
   if (STOCK_BALANCES[userId]?.[stockSymbol]?.no) {
     if (STOCK_BALANCES[userId]?.[stockSymbol]?.no.quantity < quantity) {

@@ -45,22 +45,16 @@ export const buyYesOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol] = { yes: {}, no: {} };
   }
 
-  //   if (ORDERBOOK[stockSymbol].no[10 - price]) {
-  //     mintOppositeStock(stockSymbol, price, quantity, 'yes');
-  //   }
+  let availableQuantity = 0;
+  let availableNoQuantity = 0;
+  if (ORDERBOOK[stockSymbol].yes[price]) {
+    availableQuantity = ORDERBOOK[stockSymbol].yes[price].total;
+    availableNoQuantity = ORDERBOOK[stockSymbol].no[10 - price]?.total;
+  }
 
-  if (
-    !ORDERBOOK[stockSymbol].yes[price] &&
-    !ORDERBOOK[stockSymbol].no[10 - price]
-  ) {
-    // ORDERBOOK[stockSymbol].yes[price] = { total: 0, orders: {} };
-    mintOppositeStock(stockSymbol, price, quantity, userId, "yes");
-  } else {
-    // ORDERBOOK[stockSymbol].yes[price].total -= quantity;
-    // ORDERBOOK[stockSymbol].yes[price].orders[userId] =
-    //   (ORDERBOOK[stockSymbol].yes[price].orders[userId] || 0) - quantity;
+  let tempQuantity = quantity;
 
-    let tempQuantity = quantity;
+  if (availableQuantity > 0) {
     for (let user in ORDERBOOK[stockSymbol].yes[price].orders) {
       if (tempQuantity <= 0) break;
 
@@ -68,6 +62,7 @@ export const buyYesOption = (req: Request, res: Response): Response => {
       const toTake = Math.min(available, tempQuantity);
 
       ORDERBOOK[stockSymbol].yes[price].orders[user] -= toTake;
+      ORDERBOOK[stockSymbol].yes[price].total -= toTake;
       tempQuantity -= toTake;
 
       if (ORDERBOOK[stockSymbol].yes[price].orders[user] === 0) {
@@ -75,12 +70,43 @@ export const buyYesOption = (req: Request, res: Response): Response => {
       }
     }
 
-    initializeStockBalance(userId, stockSymbol);
-
-    if (STOCK_BALANCES[userId][stockSymbol]?.yes) {
-      STOCK_BALANCES[userId][stockSymbol].yes.quantity += quantity;
+    if (ORDERBOOK[stockSymbol].yes[price].total === 0) {
+      delete ORDERBOOK[stockSymbol].yes[price];
     }
   }
+
+  if (availableNoQuantity > 0 && ORDERBOOK[stockSymbol].no[10-price]) {
+    for (let user in ORDERBOOK[stockSymbol].no[10 - price].orders) {
+      if (tempQuantity <= 0) break;
+
+      const available = ORDERBOOK[stockSymbol].no[10 - price].orders[user];
+      const toTake = Math.min(available, tempQuantity);
+
+      ORDERBOOK[stockSymbol].no[10 - price].orders[user] -= toTake;
+      ORDERBOOK[stockSymbol].no[10 - price].total -= toTake;
+      tempQuantity -= toTake;
+
+      if (ORDERBOOK[stockSymbol].no[10 - price].orders[user] === 0) {
+        delete ORDERBOOK[stockSymbol].no[10 - price].orders[user];
+      }
+    }
+
+    if (ORDERBOOK[stockSymbol].no[10 - price].total === 0) {
+      delete ORDERBOOK[stockSymbol].no[10 - price];
+    }
+  }
+
+  if (tempQuantity > 0) {
+    mintOppositeStock(stockSymbol, price, tempQuantity, userId, "yes");
+  }
+
+  initializeStockBalance(userId, stockSymbol);
+
+  if (STOCK_BALANCES[userId][stockSymbol]?.yes) {
+    STOCK_BALANCES[userId][stockSymbol].yes.quantity += quantity - tempQuantity;
+  }
+
+  INR_BALANCES[userId].locked -= ((quantity - tempQuantity) * price);
 
   return res.json({
     message: `Buy order for 'yes' added for ${stockSymbol}`,
@@ -103,21 +129,16 @@ export const buyNoOption = (req: Request, res: Response): Response => {
     ORDERBOOK[stockSymbol] = { yes: {}, no: {} };
   }
 
-  //   if (ORDERBOOK[stockSymbol].yes[10 - price]) {
-  //     mintOppositeStock(stockSymbol, price, quantity, 'no');
-  //   }
+  let availableQuantity = 0;
+  let availableYesQuantity = 0;
+  if (ORDERBOOK[stockSymbol].no[price]) {
+    availableQuantity = ORDERBOOK[stockSymbol].no[price].total;
+    availableYesQuantity = ORDERBOOK[stockSymbol].yes[10-price]?.total
+  }
 
-  if (
-    !ORDERBOOK[stockSymbol].no[price] &&
-    !ORDERBOOK[stockSymbol].yes[10 - price]
-  ) {
-    mintOppositeStock(stockSymbol, price, quantity, userId, "no");
-  } else {
-    // ORDERBOOK[stockSymbol].no[price].total -= quantity;
-    // ORDERBOOK[stockSymbol].no[price].orders[userId] =
-    //   (ORDERBOOK[stockSymbol].no[price].orders[userId] || 0) - quantity;
+  let tempQuantity = quantity;
 
-    let tempQuantity = quantity;
+  if (availableQuantity > 0) {
     for (let user in ORDERBOOK[stockSymbol].no[price].orders) {
       if (tempQuantity <= 0) break;
 
@@ -125,6 +146,7 @@ export const buyNoOption = (req: Request, res: Response): Response => {
       const toTake = Math.min(available, tempQuantity);
 
       ORDERBOOK[stockSymbol].no[price].orders[user] -= toTake;
+      ORDERBOOK[stockSymbol].no[price].total -= toTake;
       tempQuantity -= toTake;
 
       if (ORDERBOOK[stockSymbol].no[price].orders[user] === 0) {
@@ -132,12 +154,43 @@ export const buyNoOption = (req: Request, res: Response): Response => {
       }
     }
 
-    initializeStockBalance(userId, stockSymbol);
-
-    if (STOCK_BALANCES[userId][stockSymbol]?.no) {
-      STOCK_BALANCES[userId][stockSymbol].no.quantity += quantity;
+    if (ORDERBOOK[stockSymbol].no[price].total === 0) {
+      delete ORDERBOOK[stockSymbol].no[price];
     }
   }
+
+  if (availableYesQuantity > 0 && ORDERBOOK[stockSymbol].yes[10-price]) {
+    for (let user in ORDERBOOK[stockSymbol].yes[10-price].orders) {
+      if (tempQuantity <= 0) break;
+
+      const available = ORDERBOOK[stockSymbol].yes[10-price].orders[user];
+      const toTake = Math.min(available, tempQuantity);
+
+      ORDERBOOK[stockSymbol].yes[10-price].orders[user] -= toTake;
+      ORDERBOOK[stockSymbol].yes[10-price].total -= toTake;
+      tempQuantity -= toTake;
+
+      if (ORDERBOOK[stockSymbol].yes[10-price].orders[user] === 0) {
+        delete ORDERBOOK[stockSymbol].yes[10-price].orders[user];
+      }
+    }
+
+    if (ORDERBOOK[stockSymbol].yes[10-price].total === 0) {
+      delete ORDERBOOK[stockSymbol].yes[10-price];
+    }
+  }
+
+  if (tempQuantity > 0) {
+    mintOppositeStock(stockSymbol, price, tempQuantity, userId, "no");
+  }
+
+  initializeStockBalance(userId, stockSymbol);
+
+  if (STOCK_BALANCES[userId][stockSymbol]?.no) {
+    STOCK_BALANCES[userId][stockSymbol].no.quantity += quantity - tempQuantity;
+  }
+  
+  INR_BALANCES[userId].locked -= ((quantity - tempQuantity) * price);
 
   return res.json({
     message: `Buy order for 'no' added for ${stockSymbol}`,

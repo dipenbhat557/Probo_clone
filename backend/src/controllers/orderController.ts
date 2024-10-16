@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
-import { INR_BALANCES, STOCK_BALANCES } from "../models/balances";
 import { ORDERBOOK } from "../models/orderbook";
 import {
   buyNoOption,
   buyYesOption,
-  initializeStockBalance,
   sellNoOption,
   sellYesOption,
-  validateOrder,
 } from "../utils/helper";
 
 export const buyOption = (req: Request, res: Response) => {

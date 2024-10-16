@@ -2,7 +2,6 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "cross-env NODE_OPTIONS='$NODE_OPTIONS --experimental-vm-modules/' npx jest"
   },

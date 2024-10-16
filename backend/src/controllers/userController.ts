@@ -9,6 +9,7 @@ export const createUser = (req: Request, res: Response) => {
         return res.status(400).json({ error: 'User already exists' });
     }
     INR_BALANCES[userId] = { balance: 0, locked: 0 } as INRBalance;
+    STOCK_BALANCES[userId] = {}
     res.json({ message: `User ${userId} created`, balance: INR_BALANCES[userId] });
 };
 

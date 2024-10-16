@@ -20,9 +20,11 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@types/ws": "^8.5.12",
     "backend": "file:",
     "express": "^4.21.1",
     "jest": "^29.7.0",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "ws": "^8.18.0"
   }
 }

@@ -6,6 +6,7 @@ import {
   sellNoOption,
   sellYesOption,
 } from "../utils/helper";
+import { ws } from "..";
 
 export const buyOption = (req: Request, res: Response) => {
   const {
@@ -18,9 +19,13 @@ export const buyOption = (req: Request, res: Response) => {
   const price = originalPrice / 100;
 
   if (stockType == "yes") {
-    return buyYesOption(userId, stockSymbol, quantity, price, res);
+    const response = buyYesOption(userId, stockSymbol, quantity, price, res);
+    ws.send(JSON.stringify(ORDERBOOK))
+    return response;
   } else if (stockType == "no") {
-    return buyNoOption(userId, stockSymbol, quantity, price, res);
+    const response = buyNoOption(userId, stockSymbol, quantity, price, res);
+    ws.send(JSON.stringify(ORDERBOOK))
+    return response;
   }
 };
 
@@ -35,9 +40,13 @@ export const sellOption = (req: Request, res: Response) => {
   const price = originalPrice / 100;
 
   if (stockType == "yes") {
-    return sellYesOption(userId, stockSymbol, quantity, price, res);
+    const response = sellYesOption(userId, stockSymbol, quantity, price, res);
+    ws.send(JSON.stringify(ORDERBOOK))
+    return response;
   } else if (stockType == "no") {
-    return sellNoOption(userId, stockSymbol, quantity, price, res);
+    const response = sellNoOption(userId, stockSymbol, quantity, price, res);
+    ws.send(JSON.stringify(ORDERBOOK))
+    return response;
   }
 };
 

@@ -1,5 +1,6 @@
 backend/node_modules
 backend/dist
 backend/tsconfig/tsbuildinfo
+backend/index-copy
 web_socket/node_modules
 web_socket/dist

@@ -10,37 +10,18 @@ app.use(express.json());
 app.use('/',someRoutes)
 
 const port = 3000;
-const httpServer = app.listen(port);
+app.listen(port);
 
-const wss = new WebSocketServer({ server: httpServer });
+export const ws = new WebSocket("ws://localhost:8080")
 
-const broadcastOrderbookUpdate = () => {
-    const data = JSON.stringify({
-        type: "orderbook_update",
-        orderbook: ORDERBOOK
-    });
+ws.on("open", ()=>{
+    console.log("Connected to the websocket Hurrayyy!!")
+})
 
-    wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(data);
-        }
-    });
-};
+ws.on("message", (data,isBinary)=>{
+    console.log("got data is ", JSON.parse(data.toString()))
+})
 
-wss.on('connection', (ws: WebSocket) => {
-    console.log("Client connected");
-
-    ws.send(JSON.stringify({ type: "initial_orderbook", orderbook: ORDERBOOK }));
-
-    ws.on('message', (message:any) => {
-        console.log('Received message:', message.toString());
-    });
-
-    ws.on('close', () => {
-        console.log("Client disconnected");
-    });
-});
-
-setInterval(broadcastOrderbookUpdate, 5000);  
-
-export default app;
+ws.on("close",()=>{
+    console.log("Connection closed successfully")
+})

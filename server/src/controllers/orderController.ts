@@ -6,7 +6,20 @@ import {
   sellNoOption,
   sellYesOption,
 } from "../utils/helper";
-import { ws } from "..";
+import { redisClient, requestQueue, responseQueue, ws } from "..";
+
+
+export const placeOrder = async (req:Request, res: Response) => {
+  const data = req.body;
+  const orderData = {method:"buyStock",payload: data}
+
+  await redisClient.lPush(requestQueue, JSON.stringify(orderData))
+
+  const response = await redisClient.brPop(responseQueue, 0)
+
+  res.json(JSON.parse(response!.toString()));
+
+}
 
 export const buyOption = (req: Request, res: Response) => {
   const {

@@ -1,8 +1,12 @@
 import express from 'express';
 import someRoutes from './routes/routes'
 import { WebSocket} from 'ws';
+import redis from 'redis'
 
 const app = express();
+export const redisClient = redis.createClient();
+export const requestQueue = 'requestQueue'
+export const responseQueue = 'responseQueue'
 
 app.use(express.json());
 

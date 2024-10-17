@@ -17,16 +17,17 @@ export const buyOption = (req: Request, res: Response) => {
     stockType,
   } = req.body;
   const price = originalPrice / 100;
+  let response;
 
   if (stockType == "yes") {
-    const response = buyYesOption(userId, stockSymbol, quantity, price, res);
-    ws.send(JSON.stringify(ORDERBOOK))
-    return response;
+    response = buyYesOption(userId, stockSymbol, quantity, price, res);
   } else if (stockType == "no") {
-    const response = buyNoOption(userId, stockSymbol, quantity, price, res);
-    ws.send(JSON.stringify(ORDERBOOK))
-    return response;
+    response = buyNoOption(userId, stockSymbol, quantity, price, res);
   }
+
+  ws.send(JSON.stringify(ORDERBOOK));  
+
+  return response;
 };
 
 export const sellOption = (req: Request, res: Response) => {

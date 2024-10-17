@@ -1,7 +1,6 @@
 import express from 'express';
 import someRoutes from './routes/routes'
-import { WebSocket, WebSocketServer } from 'ws';
-import { ORDERBOOK } from './models/orderbook';
+import { WebSocket} from 'ws';
 
 const app = express();
 
@@ -18,9 +17,10 @@ ws.on("open", ()=>{
     console.log("Connected to the websocket Hurrayyy!!")
 })
 
-ws.on("message", (data,isBinary)=>{
-    console.log("got data is ", JSON.parse(data.toString()))
-})
+ws.on("message", (message) => {
+    const data = JSON.parse(message.toString());  
+    console.log("Parsed data:", data);
+});
 
 ws.on("close",()=>{
     console.log("Connection closed successfully")

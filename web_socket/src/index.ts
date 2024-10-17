@@ -12,14 +12,14 @@ wss.on('connection', (ws: WebSocket) => {
 
     ws.send(JSON.stringify({  orderbook: {} }));
 
-    ws.on('message', (message, isBinary) => {
+    ws.on('message', (message)=> {
         const data = JSON.stringify({
-            orderbook: message
+            orderbook: message.toString()
         });
     
         wss.clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(data,{binary:isBinary});
+                client.send(data);
             }
         });
     });

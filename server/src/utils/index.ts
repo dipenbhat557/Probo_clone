@@ -2,20 +2,24 @@ import { Request, Response } from "express";
 import { redisClient, requestQueue, responseQueue } from "..";
 import { randomUUID } from "crypto";
 
+const sendResponse = (res:Response, payload:any) => {
+    console.log(payload)
+    const {error, ...data} = JSON.parse(payload);
+
+    if(error){
+        res.status(404).json(data)
+    }else{
+        res.status(200).json(data)
+    }
+}
+
 export const createUser = async (req: Request, res: Response) => {
     const {userId} = req.params
     const uid = randomUUID()
-    console.log("got the request")
     const data = {method:"createUser", uid:uid, payload: userId};
-    console.log("order data is in create user method in server ",data)
-
     await redisClient.lPush(requestQueue, JSON.stringify(data))
-    console.log("completed sending pushing")
     const response = await redisClient.brPop(`${responseQueue}/${uid}`, 0)
-
-    console.log("response from create user method is ",response)
-    res.send(response?.element)
-
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const createSymbol = async (req:Request, res: Response) => {
@@ -25,7 +29,7 @@ export const createSymbol = async (req:Request, res: Response) => {
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const viewOrderbook = async (req: Request, res: Response) => {
@@ -34,7 +38,7 @@ export const viewOrderbook = async (req: Request, res: Response) => {
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const getINRBalance = async (req: Request, res: Response) => {
@@ -43,7 +47,7 @@ export const getINRBalance = async (req: Request, res: Response) => {
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const getStockBalance = async (req: Request, res: Response) => {
@@ -52,7 +56,7 @@ export const getStockBalance = async (req: Request, res: Response) => {
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const resetAll = async (req: Request, res: Response) => {
@@ -61,7 +65,7 @@ export const resetAll = async (req: Request, res: Response) => {
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const getIndividualBalance = async (req: Request, res: Response) => {
@@ -71,7 +75,7 @@ export const getIndividualBalance = async (req: Request, res: Response) => {
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const onrampINR = async (req: Request, res: Response) => {
@@ -81,7 +85,8 @@ export const onrampINR = async (req: Request, res: Response) => {
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    console.log("response element is ",JSON.stringify(response?.element))
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const getIndividualStockBalance = async (req: Request, res: Response) => {
@@ -91,7 +96,7 @@ export const getIndividualStockBalance = async (req: Request, res: Response) => 
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const buyOption = async (req: Request, res: Response) => {
@@ -99,16 +104,15 @@ export const buyOption = async (req: Request, res: Response) => {
         userId,
         stockSymbol,
         quantity,
-        price: originalPrice,
+        price,
         stockType,
       } = req.body;
-      const price = originalPrice / 100;
     const uid = randomUUID();
     const data = {method:"buyOption", uid:uid, payload: {userId:userId, stockSymbol: stockSymbol, quantity:quantity, price: price, stockType:stockType}}
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const sellOption = async (req: Request, res: Response) => {
@@ -116,16 +120,15 @@ export const sellOption = async (req: Request, res: Response) => {
         userId,
         stockSymbol,
         quantity,
-        price: originalPrice,
+        price,
         stockType,
       } = req.body;
-      const price = originalPrice / 100;
     const uid = randomUUID();
     const data = {method:"sellOption", uid:uid, payload: {userId:userId, stockSymbol: stockSymbol, quantity:quantity, price: price, stockType:stockType}}
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const viewIndividualOrderbook = async (req: Request, res: Response) => {
@@ -135,7 +138,7 @@ export const viewIndividualOrderbook = async (req: Request, res: Response) => {
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }
 
 export const mintTrade = async (req: Request, res: Response) => {
@@ -145,5 +148,5 @@ export const mintTrade = async (req: Request, res: Response) => {
     await redisClient.lPush(requestQueue, JSON.stringify(data))
 
     const response = await redisClient.brPop(`${responseQueue}/${uid}`,0)
-    res.send(response?.element)
+    sendResponse(res, JSON.parse(JSON.stringify(response?.element)))
 }

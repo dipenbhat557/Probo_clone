@@ -20,7 +20,7 @@ ws.on("open", () => {
 
 ws.on("message", (message) => {
   const data = JSON.parse(message.toString());
-  console.log("Parsed data:", data);
+  console.log("Parsed data from server websocket : ", data);
 });
 
 ws.on("close", () => {

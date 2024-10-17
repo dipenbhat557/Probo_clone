@@ -9,10 +9,11 @@ export const requestQueue = "requestQueue";
 export const responseQueue = "responseQueue";
 
 async function pollQueue() {
+  
   const data = await redisClient.brPop(requestQueue, 0);
   console.log("request to the queue data is ", data?.element);
 
-  const response = processOrder(JSON.parse(data!.element));
+  await processOrder(JSON.parse(data!.element));
 
   await redisClient.lPush(responseQueue, JSON.stringify(ORDERBOOK));
   

@@ -1,4 +1,3 @@
-import { Request, Response } from "express";
 import { ORDERBOOK } from "../models/orderbook";
 import {
   buyNoOption,
@@ -17,7 +16,7 @@ export const buyOption = (userId:string, stockSymbol:string, quantity:number, or
   } else if (stockType == "no") {
     response = buyNoOption(userId, stockSymbol, quantity, price);
   }
-  return response;
+  return {error:false, msg:response};
 };
 
 export const sellOption = (userId:string, stockSymbol:string, quantity:number, originalPrice:number,stockType:string) => {
@@ -26,10 +25,10 @@ export const sellOption = (userId:string, stockSymbol:string, quantity:number, o
 
   if (stockType == "yes") {
     const response = sellYesOption(userId, stockSymbol, quantity, price);
-    return response;
+    return {error:false, msg: response};
   } else if (stockType == "no") {
     const response = sellNoOption(userId, stockSymbol, quantity, price)
-    return response;
+    return {error:false, msg:response};
   }
 };
 
@@ -41,8 +40,8 @@ export const viewIndividualOrderbook = (stockSymbol:string) => {
   const orderbook = ORDERBOOK[stockSymbol];
 
   if (!orderbook) {
-    return { error: "Orderbook with provided stock symbol not found" };
+    return { error:true, msg: "Orderbook with provided stock symbol not found" };
   }
 
-  return orderbook;
+  return {error:false, msg: orderbook};
 };

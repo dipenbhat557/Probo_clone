@@ -6,31 +6,31 @@ import { ORDERBOOK, resetOrderbook } from '../models/orderbook';
 export const createUser = (userId:string) => {
     console.log("user id inside create user method is ",userId)
     if (INR_BALANCES[userId]) {
-        return "User already exists";
+        return {error:true, msg:"User already exists"};
     }
     INR_BALANCES[userId] = { balance: 0, locked: 0 } as INRBalance;
     STOCK_BALANCES[userId] = {}
-    return "User created successfully"
+    return { error:false, msg: `User ${userId} created successfully`, balance: INR_BALANCES }
 };
 
 export const getINRBalance = () => {
-    return INR_BALANCES
+    return {error:false, msg: INR_BALANCES}
 };
 
 export const getIndividualBalance = (userId:string) => {
     const balance = INR_BALANCES[userId];
     if (!balance) {
-        return "user not found"
+        return {error:true, msg: `User ${userId} not found`}
     }
-    return balance
+    return {error:false, msg: balance}
 };
 
 export const onrampINR = (userId: string, amount: number) => {
     if (!INR_BALANCES[userId]) {
-        return "User not found"
+        return {error:true, msg: `User ${userId} not found`}
     }
     INR_BALANCES[userId].balance += amount;
-    return { message: `INR ${amount / 100} added to user ${userId}`, balance: INR_BALANCES[userId] };
+    return {error: false,  msg: `INR ${amount / 100} added to user ${userId}`, balance: INR_BALANCES[userId] };
 };
 
 
@@ -39,5 +39,5 @@ export const resetAll = () => {
     resetInrbalance()
     resetStockbalance()
 
-    return {message:"Orderbook, stock balances and inr balances resetted successfully"}
+    return {error:false, msg:"Orderbook, stock balances and inr balances resetted successfully" }
 }

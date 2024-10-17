@@ -43,7 +43,7 @@ export const createSymbol = (stockSymbol: string) => {
 
   ORDERBOOK[stockSymbol] = { yes: {}, no: {} };
 
-  return { message: `Symbol ${stockSymbol} created successfully.` };
+  return { error: false, msg: `Symbol ${stockSymbol} created successfully.` };
 };
 
 export const getStockBalance = () => {
@@ -53,9 +53,9 @@ export const getStockBalance = () => {
 export const getIndividualStockBalance = (userId: string) => {
   const stock = STOCK_BALANCES[userId];
   if (!stock) {
-    return { error: "User not found or no stock balance available" };
+    return { error:true, msg: "User not found or no stock balance available" };
   }
-  return stock;
+  return {error:false, msg: stock};
 };
 
 export const mintTrade = (
@@ -73,5 +73,5 @@ export const mintTrade = (
     (ORDERBOOK?.[stockSymbol]?.no[5]?.orders[userId].quantity || 0) + quantity;
   ORDERBOOK[stockSymbol].no[5].orders[userId].type = "sell";
 
-  return ORDERBOOK?.[stockSymbol];
+  return {error:false, msg: ORDERBOOK?.[stockSymbol]};
 };

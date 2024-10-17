@@ -17,15 +17,14 @@ wss.on("connection", (ws: WebSocket) => {
 
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(data?.element));
-        console.log("data sent ",JSON.stringify(data?.element))
+        client.send(JSON.parse(JSON.stringify(data?.element)));
+        console.log("data sent ", JSON.stringify(data?.element));
       }
     });
 
     pollQueue();
   }
 
-  
   pollQueue();
 });
 

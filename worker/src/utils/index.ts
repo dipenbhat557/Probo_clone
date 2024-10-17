@@ -1,68 +1,83 @@
-import { redisClient, responseQueue } from "..";
-import { buyOption, sellOption, viewIndividualOrderbook, viewOrderbook } from "../controllers/orderController";
-import { createSymbol, getIndividualStockBalance, getStockBalance, mintTrade } from "../controllers/stockController";
-import { createUser, getIndividualBalance, getINRBalance, onrampINR, resetAll } from "../controllers/userController";
+import {  publisher } from "..";
+import { 
+    buyOption, 
+    sellOption, 
+    viewIndividualOrderbook, 
+    viewOrderbook 
+} from "../controllers/orderController";
+import { 
+    createSymbol, 
+    getIndividualStockBalance, 
+    getStockBalance, 
+    mintTrade 
+} from "../controllers/stockController";
+import { 
+    createUser, 
+    getIndividualBalance, 
+    getINRBalance, 
+    onrampINR, 
+    resetAll 
+} from "../controllers/userController";
 
 export async function processOrder(orderData: any) {
     let processedData;
-    console.log("reached processOrder with ",orderData)
+    console.log("Reached processOrder with: ", orderData);
 
-    switch(orderData?.method){
+    switch (orderData?.method) {
         case "createUser":
-            processedData = createUser(orderData.payload)
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await createUser(orderData.payload);
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "createSymbol":
-            processedData = createSymbol(orderData.payload)
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await createSymbol(orderData.payload);
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "viewOrderbook":
-            processedData = viewOrderbook()
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await viewOrderbook();
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "getINRBalance":
-            processedData = getINRBalance()
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await getINRBalance();
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "getStockBalance":
-            processedData = getStockBalance()
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await getStockBalance();
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "resetAll":
-            processedData = resetAll()
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await resetAll();
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "getIndividualBalance":
-            processedData = getIndividualBalance(orderData.payload)
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await getIndividualBalance(orderData.payload);
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "onrampINR":
-            processedData = onrampINR(orderData.payload.userId, orderData.payload.amount)
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await onrampINR(orderData.payload.userId, orderData.payload.amount);
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "getIndividualStockBalance":
-            processedData = getIndividualStockBalance(orderData.payload)
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await getIndividualStockBalance(orderData.payload);
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "buyOption":
-            let {userId, stockSymbol, quantity, price, stockType} = orderData.payload
-            processedData = buyOption(userId, stockSymbol, quantity, price, stockType)
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            const { userId, stockSymbol, quantity, price, stockType } = orderData.payload;
+            processedData = await buyOption(userId, stockSymbol, quantity, price, stockType);
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "sellOption":
-            processedData = sellOption(orderData.payload.userId, orderData.payload.stockSymbol, orderData.payload.quantity, orderData.payload.price, orderData.payload.stockType)
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await sellOption(orderData.payload.userId, orderData.payload.stockSymbol, orderData.payload.quantity, orderData.payload.price, orderData.payload.stockType);
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "viewIndividualOrderbook":
-            processedData = viewIndividualOrderbook(orderData.payload)
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await viewIndividualOrderbook(orderData.payload);
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "mintTrade":
-            processedData = mintTrade(orderData.payload.userId, orderData.payload.stockSymbol, orderData.payload.quantity)
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`, JSON.stringify(processedData) || "The processed data is empty")
+            processedData = await mintTrade(orderData.payload.userId, orderData.payload.stockSymbol, orderData.payload.quantity);
+            await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         default:
-            await redisClient.lPush(`${responseQueue}/${orderData.uid}`,"Method not available")
+            await publisher.publish(`response.${orderData.uid}`, "Method not available");
     }
-
-  }
+}

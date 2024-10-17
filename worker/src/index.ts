@@ -5,8 +5,17 @@ import { processOrder } from "./utils";
 
 const app = express();
 export const redisClient = createClient();
+export const publisher = createClient()
 export const requestQueue = "requestQueue";
-export const responseQueue = "responseQueue";
+// export const responseQueue = "responseQueue";
+
+async function publishAllOrderbooks() {
+  for (const stockSymbol in ORDERBOOK) {
+    const channel = `orderbook.${stockSymbol}`;
+    await redisClient.publish(channel, JSON.stringify(ORDERBOOK[stockSymbol]));
+    console.log(`Published orderbook for ${stockSymbol} to ${channel}`);
+  }
+}
 
 async function pollQueue() {
   
@@ -15,7 +24,7 @@ async function pollQueue() {
 
   await processOrder(JSON.parse(data!.element));
 
-  await redisClient.lPush(responseQueue, JSON.stringify(ORDERBOOK));
+  await publishAllOrderbooks()
   
   pollQueue();
 }
@@ -23,6 +32,8 @@ async function pollQueue() {
 async function startServer() {
   try {
     await redisClient.connect();
+    await publisher.connect()
+    publishAllOrderbooks()
     console.log("Connected to Redis");
 
     app.listen(3001, () => {

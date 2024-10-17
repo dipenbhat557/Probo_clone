@@ -5,8 +5,9 @@ import { createClient } from "redis";
 
 const app = express();
 export const redisClient = createClient();
+export const subscriber = createClient();
 export const requestQueue = "requestQueue";
-export const responseQueue = "responseQueue";
+// export const responseQueue = "responseQueue";
 
 app.use(express.json());
 
@@ -30,6 +31,7 @@ ws.on("close", () => {
 async function startServer() {
   try {
     await redisClient.connect();
+    await subscriber.connect();
     console.log("Connected to Redis");
 
     app.listen(3000, () => {

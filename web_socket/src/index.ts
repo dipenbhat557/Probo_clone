@@ -1,32 +1,42 @@
-import WebSocket, { WebSocketServer } from 'ws';
-import express from "express"
-import redis from 'redis'
+import WebSocket, { WebSocketServer } from "ws";
+import express from "express";
+import { createClient } from "redis";
 
-const app = express()
-const httpServer = app.listen(8080)
+const app = express();
+const httpServer = app.listen(8080);
 const wss = new WebSocketServer({ server: httpServer });
-const redisClient = redis.createClient();
-const responseQueue = 'responseQueue'
+const redisClient = createClient();
+const responseQueue = "responseQueue";
 
+wss.on("connection", (ws: WebSocket) => {
+  console.log("Client connected");
+  startServer();
 
-wss.on('connection', (ws: WebSocket) => {
-    console.log('Client connected');
-    
-    async function pollQueue() {
-        const data = await redisClient.brPop(responseQueue, 0)
+  async function pollQueue() {
+    const data = await redisClient.brPop(responseQueue, 0);
 
-            wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(data?.element));
-                }
-            });
-
-            pollQueue();
-    }
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(data?.element));
+        console.log("data sent ",JSON.stringify(data?.element))
+      }
+    });
 
     pollQueue();
+  }
+
+  
+  pollQueue();
 });
 
+async function startServer() {
+  try {
+    await redisClient.connect();
+    console.log("Connected to Redis");
+  } catch (error) {
+    console.error("Failed to connect to Redis", error);
+  }
+}
 
 // wss.on('connection', (ws: WebSocket) => {
 //     console.log("Client connected");
@@ -37,7 +47,7 @@ wss.on('connection', (ws: WebSocket) => {
 //         const data = JSON.stringify({
 //             orderbook: message.toString()
 //         });
-    
+
 //         wss.clients.forEach(client => {
 //             if (client.readyState === WebSocket.OPEN) {
 //                 client.send(data);
@@ -49,4 +59,3 @@ wss.on('connection', (ws: WebSocket) => {
 //         console.log("Client disconnected");
 //     });
 // });
-

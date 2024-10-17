@@ -66,17 +66,16 @@ export const buyYesOption = (
   stockSymbol: string,
   quantity: number,
   price: number,
-  res: Response
-): Response => {
+) => {
   if (!validateOrder(userId, quantity, price, INR_BALANCES)) {
-    return res.status(400).json({ error: "Invalid order" });
+    return { error: "Invalid order" };
   }
 
   INR_BALANCES[userId].balance -= quantity * price;
   INR_BALANCES[userId].locked += quantity * price;
 
   if (!ORDERBOOK[stockSymbol]) {
-    res.status(404).json({msg:"Invalid stock symbol"});
+    return {msg:"Invalid stock symbol"};
   }
 
   let availableQuantity = 0;
@@ -171,10 +170,10 @@ export const buyYesOption = (
 
   INR_BALANCES[userId].locked -= (quantity - tempQuantity) * price;
 
-  return res.json({
+  return {
     message: `Buy order for 'yes' added for ${stockSymbol}`,
     orderbook: ORDERBOOK[stockSymbol],
-  });
+  };
 };
 
 export const buyNoOption = (
@@ -182,17 +181,16 @@ export const buyNoOption = (
   stockSymbol: string,
   quantity: number,
   price: number,
-  res: Response
-): Response => {
+) => {
   if (!validateOrder(userId, quantity, price, INR_BALANCES)) {
-    return res.status(400).json({ error: "Invalid order" });
+    return { error: "Invalid order" };
   }
 
   INR_BALANCES[userId].balance -= quantity * price;
   INR_BALANCES[userId].locked += quantity * price;
 
   if (!ORDERBOOK[stockSymbol]) {
-    res.status(404).json({msg:"Invalid stock symbol"});
+    return {msg:"Invalid stock symbol"};
   }
 
   let availableQuantity = 0;
@@ -331,10 +329,10 @@ export const buyNoOption = (
 
   INR_BALANCES[userId].locked -= (quantity - tempQuantity) * price;
 
-  return res.json({
+  return {
     message: `Buy order for 'no' added for ${stockSymbol}`,
     orderbook: ORDERBOOK[stockSymbol],
-  });
+  };
 };
 
 export const sellYesOption = (
@@ -342,18 +340,15 @@ export const sellYesOption = (
   stockSymbol: string,
   quantity: number,
   price: number,
-  res: Response
-): Response => {
+) => {
   
   if (!ORDERBOOK[stockSymbol]) {
-    res.status(404).json({msg:"Invalid stock symbol"});
+    return {msg:"Invalid stock symbol"};
   }
 
   if (STOCK_BALANCES[userId][stockSymbol]?.yes) {
     if (STOCK_BALANCES[userId]?.[stockSymbol]?.yes.quantity < quantity) {
-      return res
-        .status(400)
-        .json({ error: 'Insufficient "yes" stocks to sell' });
+      return { error: 'Insufficient "yes" stocks to sell' };
     }
 
     STOCK_BALANCES[userId][stockSymbol].yes.quantity -= quantity;
@@ -374,10 +369,10 @@ export const sellYesOption = (
   ORDERBOOK[stockSymbol].yes[price].orders[userId].quantity =
     (ORDERBOOK[stockSymbol].yes[price].orders[userId].quantity || 0) + quantity;
 
-  return res.json({
+  return {
     message: `Sell order for 'yes' added for ${stockSymbol}`,
     orderbook: ORDERBOOK[stockSymbol],
-  });
+  };
 };
 
 export const sellNoOption = (
@@ -385,18 +380,15 @@ export const sellNoOption = (
   stockSymbol: string,
   quantity: number,
   price: number,
-  res: Response
-): Response => {
+) => {
 
   if (!ORDERBOOK[stockSymbol]) {
-    res.status(404).json({msg:"Invalid stock symbol"});
+    return {msg:"Invalid stock symbol"};
   }
 
   if (STOCK_BALANCES[userId]?.[stockSymbol]?.no) {
     if (STOCK_BALANCES[userId]?.[stockSymbol]?.no.quantity < quantity) {
-      return res
-        .status(400)
-        .json({ error: 'Insufficient "no" stocks to sell' });
+      return { error: 'Insufficient "no" stocks to sell' };
     }
 
     STOCK_BALANCES[userId][stockSymbol].no.quantity -= quantity;
@@ -417,8 +409,8 @@ export const sellNoOption = (
   ORDERBOOK[stockSymbol].no[price].total += quantity;
   ORDERBOOK[stockSymbol].no[price].orders[userId].quantity =
     (ORDERBOOK[stockSymbol].no[price].orders[userId].quantity || 0) + quantity;
-  return res.json({
+  return {
     message: `Sell order for 'no' added for ${stockSymbol}`,
     orderbook: ORDERBOOK[stockSymbol],
-  });
+  };
 };

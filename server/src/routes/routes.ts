@@ -1,7 +1,5 @@
 import { Router } from "express";
-import { createUser, getIndividualBalance, getINRBalance, onrampINR, resetAll } from "../controllers/userController";
-import { createSymbol, getIndividualStockBalance, getStockBalance, mintTrade } from "../controllers/stockController";
-import { buyOption, sellOption, viewIndividualOrderbook, viewOrderbook } from "../controllers/orderController";
+import { buyOption, createSymbol, createUser, getIndividualBalance, getIndividualStockBalance, getINRBalance, getStockBalance, mintTrade, onrampINR, resetAll, sellOption, viewIndividualOrderbook, viewOrderbook } from "../utils";
 
 const router: Router = Router();
 

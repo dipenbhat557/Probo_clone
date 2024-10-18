@@ -58,20 +58,31 @@ export const getIndividualStockBalance = (userId: string) => {
   return {error:false, msg: stock};
 };
 
-export const mintTrade = (
-  userId: string,
-  stockSymbol: string,
-  quantity: number
-) => {
-  ORDERBOOK[stockSymbol].yes[5].total += quantity;
-  ORDERBOOK[stockSymbol].yes[5].orders[userId].quantity =
-    (ORDERBOOK?.[stockSymbol]?.yes[5]?.orders[userId].quantity || 0) + quantity;
-  ORDERBOOK[stockSymbol].yes[5].orders[userId].type = "sell";
+export const mintTrade = (userId: string, stockSymbol: string, quantity: number) => {
+  if (!STOCK_BALANCES[userId]) {
+    STOCK_BALANCES[userId] = {};
+  }
 
-  ORDERBOOK[stockSymbol].no[5].total += quantity;
-  ORDERBOOK[stockSymbol].no[5].orders[userId].quantity =
-    (ORDERBOOK?.[stockSymbol]?.no[5]?.orders[userId].quantity || 0) + quantity;
-  ORDERBOOK[stockSymbol].no[5].orders[userId].type = "sell";
+  if (!STOCK_BALANCES[userId][stockSymbol]) {
+    STOCK_BALANCES[userId][stockSymbol] = {
+      yes: {
+        quantity: 0,
+        locked: 0,
+      },
+      no: {
+        quantity: 0,
+        locked: 0,
+      },
+    };
+  }
 
-  return {error:false, msg: ORDERBOOK?.[stockSymbol]};
+  if (!STOCK_BALANCES[userId][stockSymbol].yes || !STOCK_BALANCES[userId][stockSymbol].no) {
+    STOCK_BALANCES[userId][stockSymbol].yes = { quantity: 0, locked: 0 };
+    STOCK_BALANCES[userId][stockSymbol].no = { quantity: 0, locked: 0 };
+  }
+
+  STOCK_BALANCES[userId][stockSymbol].yes.quantity += quantity;
+  STOCK_BALANCES[userId][stockSymbol].no.quantity += quantity;
+
+  return { error: false, msg: STOCK_BALANCES[userId][stockSymbol] };
 };

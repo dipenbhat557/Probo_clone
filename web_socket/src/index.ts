@@ -23,8 +23,12 @@ wss.on("connection", (ws) => {
       if (!subscriptions.has(stockSymbol)) {
         const listener = (message: string) => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(message);
-            console.log(`Sent update for ${stockSymbol}:`, message);
+            const data = {
+              event: `event_orderbook_update`,
+              message
+            }
+            ws.send(JSON.stringify(data));
+            console.log(`Sent update for ${stockSymbol}:`, JSON.stringify(data));
           }
         };
 

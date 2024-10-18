@@ -4,12 +4,12 @@
 2. API Server → Redis Request Queue:
    The API server pushes the task to the Redis request queue.
 
-3. Worker Engine → Redis Response Queue:
-   The Worker Engine picks up the task, processes it (updates the orderbook), and pushes the result to the Redis response queue.
+3. Worker Engine → Redis Response Pub/Sub:
+   The Worker Engine picks up the task, processes it (updates the orderbook), and publishes the result to the Redis response pub/sub.
 
-4. Redis Response Queue → API Server:
-   The API server listens to the Redis response queue, picks up the result, and sends the response back to the client.
+4. Redis Pub/Sub → API Server:
+   The API server listens to the Redis response Pub/Sub, picks up the result, and sends the response back to the client.
 
-5. Redis Response Queue → WebSocket Server:
-   The WebSocket server also listens to the Redis response queue. When an updated orderbook is available, it broadcasts the orderbook to all connected WebSocket clients.
+5. Redis Response Pub/Sub → WebSocket Server:
+   The WebSocket server also listens to the Redis response pub/sub. When an updated orderbook is available, it broadcasts the orderbook of that particular stock symbol to all connected WebSocket clients.
 

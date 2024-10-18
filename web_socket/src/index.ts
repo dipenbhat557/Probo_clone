@@ -8,28 +8,28 @@ const wss = new WebSocketServer({ server: httpServer });
 const redisClient = createClient();
 const redisPublisher = createClient();
 
-const subscriptions = new Map<string, WebSocket>();
+const subscriptions = new Map<string, (message: string, channel: string) => void>();
 
 wss.on("connection", (ws) => {
   console.log("Client connected");
 
   ws.on("message", async (message: WebSocket.RawData) => {
     const messageString = typeof message === "string" ? message : message.toString();
-
     const data = JSON.parse(messageString); 
 
     if (data.type === "subscribe") {
       const { stockSymbol } = data;
 
       if (!subscriptions.has(stockSymbol)) {
-        subscriptions.set(stockSymbol, ws);
-        
-        await redisClient.subscribe(`orderbook.${stockSymbol}`, (message) => {
+        const listener = (message: string) => {
           if (ws.readyState === WebSocket.OPEN) {
             ws.send(message);
             console.log(`Sent update for ${stockSymbol}:`, message);
           }
-        });
+        };
+
+        await redisClient.subscribe(`orderbook.${stockSymbol}`, listener);
+        subscriptions.set(stockSymbol, listener);
 
         console.log(`Subscribed to orderbook.${stockSymbol}`);
       } else {
@@ -39,23 +39,27 @@ wss.on("connection", (ws) => {
 
     if (data.type === "unsubscribe") {
       const { stockSymbol } = data;
-      await redisClient.unsubscribe(`orderbook.${stockSymbol}`);
-      subscriptions.delete(stockSymbol);
-      console.log(`Unsubscribed from orderbook.${stockSymbol}`);
+      const listener = subscriptions.get(stockSymbol);
+      if (listener) {
+        await redisClient.unsubscribe(`orderbook.${stockSymbol}`, listener);
+        subscriptions.delete(stockSymbol);
+        console.log(`Unsubscribed from orderbook.${stockSymbol}`);
+      }
     }
   });
 
   ws.on("close", () => {
     console.log("Client disconnected");
-    // Optionally, you can unsubscribe all channels for this client if desired
     for (const stockSymbol of subscriptions.keys()) {
-      redisClient.unsubscribe(`orderbook.${stockSymbol}`);
+      const listener = subscriptions.get(stockSymbol);
+      if (listener) {
+        redisClient.unsubscribe(`orderbook.${stockSymbol}`, listener);
+      }
     }
     subscriptions.clear();
   });
 });
 
-// Connect to Redis
 async function startServer() {
   try {
     await redisClient.connect();
@@ -67,6 +71,7 @@ async function startServer() {
 }
 
 startServer();
+;
 
 // wss.on('connection', (ws: WebSocket) => {
 //     console.log("Client connected");

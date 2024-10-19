@@ -369,8 +369,8 @@ describe('Trading System Tests', () => {
     const message = JSON.parse(executionWsMessage.message)
 
     expect(executionWsMessage.event).toBe('event_orderbook_update')
-    expect(message.yes?.[sell1Price]).toBeUndefined();
-    expect(message.no?.[sell3Price]).toEqual({
+    expect(message.yes?.[sell1Price/100]).toBeUndefined();
+    expect(message.no?.[sell3Price/100]).toEqual({
       total: 10,
       orders: { 
         [seller3Id]: { 
@@ -388,17 +388,14 @@ describe('Trading System Tests', () => {
     expect(seller2StockBalance.data.msg[symbol].yes.quantity).toBe(80);
     expect(seller3StockBalance.data.msg[symbol].no.quantity).toBe(60);
 
-    const seller1InrBalance = await axios.get(`${HTTP_SERVER_URL}/balance/inr/${seller1InrBalance}`);
-    const seller2InrBalance = await axios.get(`${HTTP_SERVER_URL}/balance/inr/${seller2InrBalance}`);
-    const seller3InrBalance = await axios.get(`${HTTP_SERVER_URL}/balance/inr/${seller3InrBalance}`);
+    const seller1InrBalance = await axios.get(`${HTTP_SERVER_URL}/balance/inr/${seller1Id}`);
+    const seller2InrBalance = await axios.get(`${HTTP_SERVER_URL}/balance/inr/${seller2Id}`);
+    const seller3InrBalance = await axios.get(`${HTTP_SERVER_URL}/balance/inr/${seller3Id}`);
 
     expect(seller1InrBalance.data.msg.balance ).toBe(sell1Price * quantity1);
     expect(seller2InrBalance.data.msg.balance).toBe(sell2Price * quantity2);
     expect(seller3InrBalance.data.msg.balance).toBe(sell3Price * (quantity3 - 10));
 
   })
-
-
-
 
 });

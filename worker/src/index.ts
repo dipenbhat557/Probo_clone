@@ -24,6 +24,7 @@ async function pollQueue() {
 
   await processOrder(JSON.parse(data!.element));
 
+  if(JSON.parse(data!.element)?.method == "buyOption" || JSON.parse(data!.element)?.method == "sellOption")
   await publishAllOrderbooks()
   
   pollQueue();

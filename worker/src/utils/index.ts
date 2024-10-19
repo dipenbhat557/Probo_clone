@@ -25,56 +25,56 @@ export async function processOrder(orderData: any) {
 
     switch (orderData?.method) {
         case "createUser":
-            processedData = await createUser(orderData.payload);
+            processedData = createUser(orderData.payload);
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "createSymbol":
-            processedData = await createSymbol(orderData.payload);
+            processedData =  createSymbol(orderData.payload);
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "viewOrderbook":
-            processedData = await viewOrderbook();
+            processedData =  viewOrderbook();
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "getINRBalance":
-            processedData = await getINRBalance();
+            processedData =  getINRBalance();
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "getStockBalance":
-            processedData = await getStockBalance();
+            processedData =  getStockBalance();
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "resetAll":
-            processedData = await resetAll();
+            processedData =  resetAll();
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "getIndividualBalance":
-            processedData = await getIndividualBalance(orderData.payload);
+            processedData =  getIndividualBalance(orderData.payload);
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "onrampINR":
-            processedData = await onrampINR(orderData.payload.userId, orderData.payload.amount);
+            processedData =  onrampINR(orderData.payload.userId, orderData.payload.amount);
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "getIndividualStockBalance":
-            processedData = await getIndividualStockBalance(orderData.payload);
+            processedData =  getIndividualStockBalance(orderData.payload);
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "buyOption":
             const { userId, stockSymbol, quantity, price, stockType } = orderData.payload;
-            processedData = await buyOption(userId, stockSymbol, quantity, price, stockType);
+            processedData =  buyOption(userId, stockSymbol, quantity, price, stockType);
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "sellOption":
-            processedData = await sellOption(orderData.payload.userId, orderData.payload.stockSymbol, orderData.payload.quantity, orderData.payload.price, orderData.payload.stockType);
+            processedData =  sellOption(orderData.payload.userId, orderData.payload.stockSymbol, orderData.payload.quantity, orderData.payload.price, orderData.payload.stockType);
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "viewIndividualOrderbook":
-            processedData = await viewIndividualOrderbook(orderData.payload);
+            processedData =  viewIndividualOrderbook(orderData.payload);
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         case "mintTrade":
-            processedData = await mintTrade(orderData.payload.userId, orderData.payload.stockSymbol, orderData.payload.quantity);
+            processedData =  mintTrade(orderData.payload.userId, orderData.payload.stockSymbol, orderData.payload.quantity);
             await publisher.publish(`response.${orderData.uid}`, JSON.stringify(processedData));
             break;
         default:

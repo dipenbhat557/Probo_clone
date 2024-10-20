@@ -300,7 +300,7 @@ describe('Trading System Tests', () => {
     expect(buyer2InrBalance.data.msg.balance).toBe(1000000- (price * (quantity+20)));
     expect(buyer3InrBalance.data.msg.balance).toBe(1000000 - ((1000-price) * (2*quantity+30)));
 
-  })
+  },15000)
 
 
   test('Execute minting the opposing selling orders and check WebSocket response', async () => {

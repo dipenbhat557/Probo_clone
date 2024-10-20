@@ -9,7 +9,9 @@ import (
 )
 
 var redisInstance *redis.Client
+var redisPublisherInstance *redis.Client
 var redisOnce sync.Once
+var redisPublisherOnce sync.Once
 
 var ctx = context.Background()
 
@@ -28,3 +30,19 @@ func GetRedisClient() *redis.Client {
 
 	return redisInstance
 }
+
+// func GetPublisherClient() *redis.Client {
+// 	redisPublisherOnce.Do(func() {
+// 		redisPublisherInstance = redis.NewClient(&redis.Options{
+// 			Addr: "localhost:6379",
+// 		})
+
+// 		if _, err := redisPublisherInstance.Ping(ctx).Result(); err != nil {
+// 			log.Fatalf("Failed to connect to Redis by publisher: %v", err)
+// 		}
+
+// 		log.Println("Redis publisher client successfully initialized.")
+// 	})
+
+// 	return redisPublisherInstance
+// }

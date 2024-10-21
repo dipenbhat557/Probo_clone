@@ -99,7 +99,7 @@ func mintOppositeStock(stockSymbol string, price float64, quantity int, userId s
 
 func BuyYesOption(userId string, stockSymbol string, quantity int, price float64) map[string]interface{} {
 	if !validateOrder(userId, quantity, price) {
-		return map[string]interface{}{"error": "Invalid order"}
+		return map[string]interface{}{"error": true, "msg": "Invalid order"}
 	}
 
 	models.INR_BALANCES[userId] = models.UserINRBalance{
@@ -152,15 +152,17 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 				models.STOCK_BALANCES[user][stockSymbol] = yesVal
 
 				models.INR_BALANCES[user] = models.UserINRBalance{
-					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*price),
+					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*price*100),
 					Locked:  models.INR_BALANCES[user].Locked,
 				}
 			} else if order.Type == "reverted" {
-				noVal := models.STOCK_BALANCES[user][stockSymbol].No
-				noVal.Quantity += toTake
+				noVal := models.STOCK_BALANCES[user][stockSymbol]
+				noVal.No.Quantity += toTake
+				models.STOCK_BALANCES[user][stockSymbol] = noVal
+
 				models.INR_BALANCES[user] = models.UserINRBalance{
 					Balance: models.INR_BALANCES[user].Balance,
-					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*price),
+					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*price*100),
 				}
 			}
 
@@ -196,7 +198,7 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 				noVal.No.Locked -= toTake
 				models.STOCK_BALANCES[user][stockSymbol] = noVal
 				models.INR_BALANCES[user] = models.UserINRBalance{
-					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*(10-price)),
+					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*(10-price)*100),
 					Locked:  models.INR_BALANCES[user].Locked,
 				}
 			} else if order.Type == "reverted" {
@@ -205,7 +207,7 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 				models.STOCK_BALANCES[user][stockSymbol] = yesVal
 				models.INR_BALANCES[user] = models.UserINRBalance{
 					Balance: models.INR_BALANCES[user].Balance,
-					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*(10-price)),
+					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*(10-price)*100),
 				}
 			}
 
@@ -224,6 +226,7 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 	}
 
 	initializeStockBalance(userId, stockSymbol)
+
 	stockVal := models.STOCK_BALANCES[userId][stockSymbol]
 	stockVal.Yes.Quantity += quantity - tempQuantity
 	models.STOCK_BALANCES[userId][stockSymbol] = stockVal
@@ -299,7 +302,7 @@ func BuyNoOption(userId string, stockSymbol string, quantity int, price float64)
 				models.STOCK_BALANCES[user][stockSymbol] = noVal
 
 				models.INR_BALANCES[user] = models.UserINRBalance{
-					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*price),
+					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*price*100),
 					Locked:  models.INR_BALANCES[user].Locked,
 				}
 			} else if order.Type == "reverted" {
@@ -309,7 +312,7 @@ func BuyNoOption(userId string, stockSymbol string, quantity int, price float64)
 
 				models.INR_BALANCES[user] = models.UserINRBalance{
 					Balance: models.INR_BALANCES[user].Balance,
-					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*price),
+					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*price*100),
 				}
 			}
 
@@ -346,7 +349,7 @@ func BuyNoOption(userId string, stockSymbol string, quantity int, price float64)
 				models.STOCK_BALANCES[user][stockSymbol] = yesVal
 
 				models.INR_BALANCES[user] = models.UserINRBalance{
-					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*(10-price)),
+					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*(10-price)*100),
 					Locked:  models.INR_BALANCES[user].Locked,
 				}
 			} else if order.Type == "reverted" {
@@ -355,7 +358,7 @@ func BuyNoOption(userId string, stockSymbol string, quantity int, price float64)
 				models.STOCK_BALANCES[user][stockSymbol] = noVal
 				models.INR_BALANCES[user] = models.UserINRBalance{
 					Balance: models.INR_BALANCES[user].Balance,
-					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*(10-price)),
+					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*(10-price)*100),
 				}
 			}
 

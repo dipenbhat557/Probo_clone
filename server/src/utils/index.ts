@@ -14,14 +14,16 @@ const sendResponse = (res: Response, payload: any) => {
         res.status(500).json({ error: "Invalid response from server" });
     }
 };
-
 const handlePubSub = (uid: string): Promise<any> => {
-    return new Promise((resolve)=> {
-        subscriber.subscribe(`response.${uid}`, (data) => {
-            resolve(data);;
+    return new Promise((resolve) => {
+        const channel = `response.${uid}`;
+
+        subscriber.subscribe(channel, (data) => {
+            resolve(data)
         });
     });
 };
+;
 
 export const createUser = async (req: Request, res: Response) => {
     const { userId } = req.params;

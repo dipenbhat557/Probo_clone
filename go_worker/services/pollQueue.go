@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -18,10 +17,12 @@ func PollQueue(rdb *redis.Client) {
 
 		fmt.Println("the data got is ", data)
 
-		var request models.Request
-		json.Unmarshal([]byte(data[1]), &request)
+		// var request models.Request
+		// json.Unmarshal(, &request)
 
-		ProcessOrder(request)
+		req := []byte(data[1])
+
+		ProcessOrder(req)
 
 	}
 }

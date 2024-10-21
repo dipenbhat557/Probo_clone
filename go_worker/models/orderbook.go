@@ -1,8 +1,8 @@
 package models
 
 type Order struct {
-	Type     string `json:"type"`
-	Quantity int    `json:"quantity"`
+	Type     string `json:"type,omitempty"`
+	Quantity int    `json:"quantity,omitempty"`
 }
 
 type PriceLevel struct {
@@ -11,8 +11,8 @@ type PriceLevel struct {
 }
 
 type OrderBookSymbol struct {
-	Yes map[string]PriceLevel `json:"yes"`
-	No  map[string]PriceLevel `json:"no"`
+	Yes map[float64]PriceLevel `json:"yes"`
+	No  map[float64]PriceLevel `json:"no"`
 }
 
 var ORDERBOOK = map[string]OrderBookSymbol{}

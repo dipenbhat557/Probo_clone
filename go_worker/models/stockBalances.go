@@ -1,8 +1,8 @@
 package models
 
 type Stock struct {
-	Quantity float64 `json:"quantity"`
-	Locked   float64 `json:"locked"`
+	Quantity int `json:"quantity,omitempty"`
+	Locked   int `json:"locked,omitempty"`
 }
 
 type UserStock struct {

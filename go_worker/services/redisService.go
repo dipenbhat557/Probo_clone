@@ -9,9 +9,11 @@ import (
 )
 
 var redisInstance *redis.Client
-var redisPublisherInstance *redis.Client
+
+// var redisPublisherInstance *redis.Client
 var redisOnce sync.Once
-var redisPublisherOnce sync.Once
+
+// var redisPublisherOnce sync.Once
 
 var ctx = context.Background()
 

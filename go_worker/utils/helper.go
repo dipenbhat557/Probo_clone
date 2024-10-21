@@ -96,7 +96,6 @@ func mintOppositeStock(stockSymbol string, price float64, quantity int, userId s
 		models.ORDERBOOK[stockSymbol].Yes[oppositePrice] = priceLevel
 	}
 }
-
 func BuyYesOption(userId string, stockSymbol string, quantity int, price float64) map[string]interface{} {
 	if !validateOrder(userId, quantity, price) {
 		return map[string]interface{}{"error": true, "msg": "Invalid order"}
@@ -108,24 +107,17 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 	}
 
 	if _, ok := models.ORDERBOOK[stockSymbol]; !ok {
-		models.ORDERBOOK[stockSymbol] = models.OrderBookSymbol{
-			No:  make(map[float64]models.PriceLevel),
-			Yes: make(map[float64]models.PriceLevel),
-		}
+		return map[string]interface{}{"error": true, "msg": "Invalid stock symbol"}
 	}
 
-	var availableQuantity, availableNoQuantity int
-	if yesBook, ok := models.ORDERBOOK[stockSymbol]; ok {
-		if priceLevel, ok := yesBook.Yes[price]; ok {
-			availableQuantity = priceLevel.Total
-		}
+	// var availableQuantity, availableNoQuantity int
+	var availableQuantity int
+	if priceLevel, ok := models.ORDERBOOK[stockSymbol].Yes[price]; ok {
+		availableQuantity = priceLevel.Total
 	}
-
-	if noBook, ok := models.ORDERBOOK[stockSymbol]; ok {
-		if priceLevel, ok := noBook.No[10-price]; ok {
-			availableNoQuantity = priceLevel.Total
-		}
-	}
+	// if priceLevel, ok := models.ORDERBOOK[stockSymbol].No[10-price]; ok {
+	// 	availableNoQuantity = priceLevel.Total
+	// }
 
 	tempQuantity := quantity
 
@@ -134,13 +126,12 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 			if tempQuantity <= 0 {
 				break
 			}
-
 			toTake := int(math.Min(float64(order.Quantity), float64(tempQuantity)))
-
 			models.ORDERBOOK[stockSymbol].Yes[price].Orders[user] = models.Order{
 				Type:     order.Type,
 				Quantity: order.Quantity - toTake,
 			}
+
 			priceVal := models.ORDERBOOK[stockSymbol].Yes[price]
 			priceVal.Total -= toTake
 			models.ORDERBOOK[stockSymbol].Yes[price] = priceVal
@@ -150,7 +141,6 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 				yesVal := models.STOCK_BALANCES[user][stockSymbol]
 				yesVal.Yes.Locked -= toTake
 				models.STOCK_BALANCES[user][stockSymbol] = yesVal
-
 				models.INR_BALANCES[user] = models.UserINRBalance{
 					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*price*100),
 					Locked:  models.INR_BALANCES[user].Locked,
@@ -159,7 +149,6 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 				noVal := models.STOCK_BALANCES[user][stockSymbol]
 				noVal.No.Quantity += toTake
 				models.STOCK_BALANCES[user][stockSymbol] = noVal
-
 				models.INR_BALANCES[user] = models.UserINRBalance{
 					Balance: models.INR_BALANCES[user].Balance,
 					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*price*100),
@@ -176,50 +165,49 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 		}
 	}
 
-	if availableNoQuantity > 0 {
-		for user, order := range models.ORDERBOOK[stockSymbol].No[10-price].Orders {
-			if tempQuantity <= 0 {
-				break
-			}
+	// if availableNoQuantity > 0 {
+	// 	for user, order := range models.ORDERBOOK[stockSymbol].No[10-price].Orders {
+	// 		if tempQuantity <= 0 {
+	// 			break
+	// 		}
+	// 		toTake := int(math.Min(float64(order.Quantity), float64(tempQuantity)))
+	// 		models.ORDERBOOK[stockSymbol].No[10-price].Orders[user] = models.Order{
+	// 			Type:     order.Type,
+	// 			Quantity: order.Quantity - toTake,
+	// 		}
 
-			toTake := int(math.Min(float64(order.Quantity), float64(tempQuantity)))
+	// 		noVal := models.ORDERBOOK[stockSymbol].No[10-price]
+	// 		noVal.Total -= toTake
+	// 		models.ORDERBOOK[stockSymbol].No[10-price] = noVal
+	// 		tempQuantity -= toTake
 
-			models.ORDERBOOK[stockSymbol].No[10-price].Orders[user] = models.Order{
-				Type:     order.Type,
-				Quantity: order.Quantity - toTake,
-			}
-			noVal := models.ORDERBOOK[stockSymbol].No[10-price]
-			noVal.Total -= toTake
-			models.ORDERBOOK[stockSymbol].No[10-price] = noVal
-			tempQuantity -= toTake
+	// 		if order.Type == "sell" {
+	// 			noVal := models.STOCK_BALANCES[user][stockSymbol]
+	// 			noVal.No.Locked -= toTake
+	// 			models.STOCK_BALANCES[user][stockSymbol] = noVal
+	// 			models.INR_BALANCES[user] = models.UserINRBalance{
+	// 				Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*(10-price)*100),
+	// 				Locked:  models.INR_BALANCES[user].Locked,
+	// 			}
+	// 		} else if order.Type == "reverted" {
+	// 			yesVal := models.STOCK_BALANCES[user][stockSymbol]
+	// 			yesVal.Yes.Quantity += toTake
+	// 			models.STOCK_BALANCES[user][stockSymbol] = yesVal
+	// 			models.INR_BALANCES[user] = models.UserINRBalance{
+	// 				Balance: models.INR_BALANCES[user].Balance,
+	// 				Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*(10-price)*100),
+	// 			}
+	// 		}
 
-			if order.Type == "sell" {
-				noVal := models.STOCK_BALANCES[user][stockSymbol]
-				noVal.No.Locked -= toTake
-				models.STOCK_BALANCES[user][stockSymbol] = noVal
-				models.INR_BALANCES[user] = models.UserINRBalance{
-					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*(10-price)*100),
-					Locked:  models.INR_BALANCES[user].Locked,
-				}
-			} else if order.Type == "reverted" {
-				yesVal := models.STOCK_BALANCES[user][stockSymbol]
-				yesVal.Yes.Quantity += toTake
-				models.STOCK_BALANCES[user][stockSymbol] = yesVal
-				models.INR_BALANCES[user] = models.UserINRBalance{
-					Balance: models.INR_BALANCES[user].Balance,
-					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*(10-price)*100),
-				}
-			}
+	// 		if models.ORDERBOOK[stockSymbol].No[10-price].Orders[user].Quantity == 0 {
+	// 			delete(models.ORDERBOOK[stockSymbol].No[10-price].Orders, user)
+	// 		}
+	// 	}
 
-			if models.ORDERBOOK[stockSymbol].No[10-price].Orders[user].Quantity == 0 {
-				delete(models.ORDERBOOK[stockSymbol].No[10-price].Orders, user)
-			}
-		}
-
-		if models.ORDERBOOK[stockSymbol].No[10-price].Total == 0 {
-			delete(models.ORDERBOOK[stockSymbol].No, 10-price)
-		}
-	}
+	// 	if models.ORDERBOOK[stockSymbol].No[10-price].Total == 0 {
+	// 		delete(models.ORDERBOOK[stockSymbol].No, 10-price)
+	// 	}
+	// }
 
 	if tempQuantity > 0 {
 		mintOppositeStock(stockSymbol, price, tempQuantity, userId, "yes")
@@ -237,7 +225,6 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 	}
 
 	res, err := ConvertIndividualOrderBookToJSON(stockSymbol)
-
 	if err != nil {
 		HandleNilError(err)
 	}
@@ -247,7 +234,6 @@ func BuyYesOption(userId string, stockSymbol string, quantity int, price float64
 		"orderbook": res,
 	}
 }
-
 func BuyNoOption(userId string, stockSymbol string, quantity int, price float64) map[string]interface{} {
 	if !validateOrder(userId, quantity, price) {
 		return map[string]interface{}{"error": "Invalid order"}
@@ -259,23 +245,26 @@ func BuyNoOption(userId string, stockSymbol string, quantity int, price float64)
 	}
 
 	if _, ok := models.ORDERBOOK[stockSymbol]; !ok {
-		models.ORDERBOOK[stockSymbol] = models.OrderBookSymbol{
-			No:  make(map[float64]models.PriceLevel),
-			Yes: make(map[float64]models.PriceLevel),
-		}
+		return map[string]interface{}{"msg": "Invalid stock symbol"}
 	}
 
-	var availableQuantity, availableYesQuantity int
+	// var availableQuantity, availableYesQuantity int
+	var availableQuantity int
+
 	if noBook, ok := models.ORDERBOOK[stockSymbol]; ok {
 		if priceLevel, ok := noBook.No[price]; ok {
 			availableQuantity = priceLevel.Total
 		}
 	}
-	if yesBook, ok := models.ORDERBOOK[stockSymbol]; ok {
-		if priceLevel, ok := yesBook.Yes[10-price]; ok {
-			availableYesQuantity = priceLevel.Total
-		}
-	}
+
+	fmt.Println("the available quant is ", availableQuantity)
+
+	// if yesBook, ok := models.ORDERBOOK[stockSymbol]; ok {
+	// 	if priceLevel, ok := yesBook.Yes[10-price]; ok {
+	// 		availableYesQuantity = priceLevel.Total
+	// 	}
+	// }
+	// fmt.Println("the available yes quantity is ", availableYesQuantity)
 
 	tempQuantity := quantity
 
@@ -300,7 +289,6 @@ func BuyNoOption(userId string, stockSymbol string, quantity int, price float64)
 				noVal := models.STOCK_BALANCES[user][stockSymbol]
 				noVal.No.Locked -= toTake
 				models.STOCK_BALANCES[user][stockSymbol] = noVal
-
 				models.INR_BALANCES[user] = models.UserINRBalance{
 					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*price*100),
 					Locked:  models.INR_BALANCES[user].Locked,
@@ -326,51 +314,54 @@ func BuyNoOption(userId string, stockSymbol string, quantity int, price float64)
 		}
 	}
 
-	if availableYesQuantity > 0 {
-		for user, order := range models.ORDERBOOK[stockSymbol].Yes[10-price].Orders {
-			if tempQuantity <= 0 {
-				break
-			}
+	// if availableYesQuantity > 0 {
+	// 	for user, order := range models.ORDERBOOK[stockSymbol].Yes[10-price].Orders {
+	// 		if tempQuantity <= 0 {
+	// 			break
+	// 		}
 
-			toTake := int(math.Min(float64(order.Quantity), float64(tempQuantity)))
+	// 		toTake := int(math.Min(float64(order.Quantity), float64(tempQuantity)))
 
-			models.ORDERBOOK[stockSymbol].Yes[10-price].Orders[user] = models.Order{
-				Type:     order.Type,
-				Quantity: order.Quantity - toTake,
-			}
-			yesPriceVal := models.ORDERBOOK[stockSymbol].Yes[10-price]
-			yesPriceVal.Total -= toTake
-			models.ORDERBOOK[stockSymbol].Yes[10-price] = yesPriceVal
-			tempQuantity -= toTake
+	// 		models.ORDERBOOK[stockSymbol].Yes[10-price].Orders[user] = models.Order{
+	// 			Type:     order.Type,
+	// 			Quantity: order.Quantity - toTake,
+	// 		}
+	// 		yesPriceVal := models.ORDERBOOK[stockSymbol].Yes[10-price]
+	// 		yesPriceVal.Total -= toTake
+	// 		models.ORDERBOOK[stockSymbol].Yes[10-price] = yesPriceVal
+	// 		fmt.Println("the tempquant before is ", tempQuantity)
+	// 		tempQuantity -= toTake
+	// 		fmt.Println("the tempquant after is ", tempQuantity)
 
-			if order.Type == "sell" {
-				yesVal := models.STOCK_BALANCES[user][stockSymbol]
-				yesVal.Yes.Locked -= toTake
-				models.STOCK_BALANCES[user][stockSymbol] = yesVal
+	// 		if order.Type == "sell" {
+	// 			yesVal := models.STOCK_BALANCES[user][stockSymbol]
+	// 			yesVal.Yes.Locked -= toTake
+	// 			models.STOCK_BALANCES[user][stockSymbol] = yesVal
 
-				models.INR_BALANCES[user] = models.UserINRBalance{
-					Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*(10-price)*100),
-					Locked:  models.INR_BALANCES[user].Locked,
-				}
-			} else if order.Type == "reverted" {
-				noVal := models.STOCK_BALANCES[user][stockSymbol]
-				noVal.No.Quantity += toTake
-				models.STOCK_BALANCES[user][stockSymbol] = noVal
-				models.INR_BALANCES[user] = models.UserINRBalance{
-					Balance: models.INR_BALANCES[user].Balance,
-					Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*(10-price)*100),
-				}
-			}
+	// 			models.INR_BALANCES[user] = models.UserINRBalance{
+	// 				Balance: models.INR_BALANCES[user].Balance + int(float64(toTake)*(10-price)*100),
+	// 				Locked:  models.INR_BALANCES[user].Locked,
+	// 			}
+	// 		} else if order.Type == "reverted" {
+	// 			noVal := models.STOCK_BALANCES[user][stockSymbol]
+	// 			noVal.No.Quantity += toTake
+	// 			models.STOCK_BALANCES[user][stockSymbol] = noVal
 
-			if models.ORDERBOOK[stockSymbol].Yes[10-price].Orders[user].Quantity == 0 {
-				delete(models.ORDERBOOK[stockSymbol].Yes[10-price].Orders, user)
-			}
-		}
+	// 			models.INR_BALANCES[user] = models.UserINRBalance{
+	// 				Balance: models.INR_BALANCES[user].Balance,
+	// 				Locked:  models.INR_BALANCES[user].Locked - int(float64(toTake)*(10-price)*100),
+	// 			}
+	// 		}
 
-		if models.ORDERBOOK[stockSymbol].Yes[10-price].Total == 0 {
-			delete(models.ORDERBOOK[stockSymbol].Yes, 10-price)
-		}
-	}
+	// 		if models.ORDERBOOK[stockSymbol].Yes[10-price].Orders[user].Quantity == 0 {
+	// 			delete(models.ORDERBOOK[stockSymbol].Yes[10-price].Orders, user)
+	// 		}
+	// 	}
+
+	// 	if models.ORDERBOOK[stockSymbol].Yes[10-price].Total == 0 {
+	// 		delete(models.ORDERBOOK[stockSymbol].Yes, 10-price)
+	// 	}
+	// }
 
 	if tempQuantity > 0 {
 		mintOppositeStock(stockSymbol, price, tempQuantity, userId, "no")
@@ -382,13 +373,14 @@ func BuyNoOption(userId string, stockSymbol string, quantity int, price float64)
 	stockVal.No.Quantity += quantity - tempQuantity
 	models.STOCK_BALANCES[userId][stockSymbol] = stockVal
 
+	fmt.Println("the quantity after buying is ", quantity, " and the tmepquantity is ", tempQuantity)
+
 	models.INR_BALANCES[userId] = models.UserINRBalance{
 		Balance: models.INR_BALANCES[userId].Balance,
 		Locked:  models.INR_BALANCES[userId].Locked - int(float64(quantity-tempQuantity)*price*100),
 	}
 
 	res, err := ConvertIndividualOrderBookToJSON(stockSymbol)
-
 	if err != nil {
 		HandleNilError(err)
 	}
@@ -420,7 +412,7 @@ func SellYesOption(userId string, stockSymbol string, quantity int, price float6
 		if remainingQuantity <= 0 {
 			break
 		}
-		if float64(p) > opposingPrice {
+		if float64(p) >= opposingPrice {
 			continue
 		}
 
@@ -432,11 +424,13 @@ func SellYesOption(userId string, stockSymbol string, quantity int, price float6
 			availableQuantity := order.Quantity
 			matchedQuantity := int(math.Min(float64(availableQuantity), float64(remainingQuantity)))
 
-			priceLevel.Orders[user] = models.Order{
+			models.ORDERBOOK[stockSymbol].No[p].Orders[user] = models.Order{
 				Type:     order.Type,
 				Quantity: availableQuantity - matchedQuantity,
 			}
 			priceLevel.Total -= matchedQuantity
+			models.ORDERBOOK[stockSymbol].No[p] = priceLevel
+
 			remainingQuantity -= matchedQuantity
 
 			if models.STOCK_BALANCES[user][stockSymbol].No.Quantity > 0 {
@@ -515,8 +509,10 @@ func SellNoOption(userId string, stockSymbol string, quantity int, price float64
 
 	remainingQuantity := quantity
 	opposingPrice := 10 - price
+	fmt.Println("initial remaining quant is ", remainingQuantity, " and opposing price is ", opposingPrice)
 
 	for p, priceLevel := range models.ORDERBOOK[stockSymbol].Yes {
+		fmt.Println("inside the loop with price ", p, " and the pricelevel ", priceLevel)
 		if remainingQuantity <= 0 {
 			break
 		}
@@ -524,7 +520,8 @@ func SellNoOption(userId string, stockSymbol string, quantity int, price float64
 			continue
 		}
 
-		for user, order := range priceLevel.Orders {
+		for user, order := range models.ORDERBOOK[stockSymbol].Yes[p].Orders {
+			fmt.Println("inside the inner loop with user ", user, " order ", order)
 			if remainingQuantity <= 0 {
 				break
 			}
@@ -532,12 +529,17 @@ func SellNoOption(userId string, stockSymbol string, quantity int, price float64
 			availableQuantity := order.Quantity
 			matchedQuantity := int(math.Min(float64(availableQuantity), float64(remainingQuantity)))
 
-			priceLevel.Orders[user] = models.Order{
+			fmt.Println("available quantity is ", availableQuantity, " matched is ", matchedQuantity, " remaining is ", remainingQuantity)
+
+			models.ORDERBOOK[stockSymbol].Yes[p].Orders[user] = models.Order{
 				Type:     order.Type,
 				Quantity: availableQuantity - matchedQuantity,
 			}
-			priceLevel.Total -= matchedQuantity
+			pOrder := models.ORDERBOOK[stockSymbol].Yes[p]
+			pOrder.Total -= matchedQuantity
 			remainingQuantity -= matchedQuantity
+			models.ORDERBOOK[stockSymbol].Yes[p] = pOrder
+			fmt.Println("remaining one after minus is ", remainingQuantity)
 
 			if models.STOCK_BALANCES[user][stockSymbol].Yes.Quantity > 0 {
 				yesLocked := models.STOCK_BALANCES[user][stockSymbol]
@@ -550,7 +552,7 @@ func SellNoOption(userId string, stockSymbol string, quantity int, price float64
 			models.INR_BALANCES[user] = indInr
 		}
 
-		if priceLevel.Total == 0 {
+		if models.ORDERBOOK[stockSymbol].Yes[p].Total == 0 {
 			delete(models.ORDERBOOK[stockSymbol].Yes, p)
 		}
 	}
@@ -562,6 +564,8 @@ func SellNoOption(userId string, stockSymbol string, quantity int, price float64
 	individualStock := models.STOCK_BALANCES[userId][stockSymbol]
 	individualStock.No.Locked -= (quantity - remainingQuantity)
 	models.STOCK_BALANCES[userId][stockSymbol] = individualStock
+
+	fmt.Println("remaining quant is ", remainingQuantity)
 
 	if remainingQuantity > 0 {
 		if _, ok := models.ORDERBOOK[stockSymbol].No[price]; !ok {

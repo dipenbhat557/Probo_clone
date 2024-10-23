@@ -1,8 +1,8 @@
 const axios = require("axios");
 const WebSocket = require("ws");
 
-const HTTP_SERVER_URL = "http://localhost:3000";
-const WS_SERVER_URL = "ws://localhost:8080";
+const HTTP_SERVER_URL = "http://localhost:3005";
+const WS_SERVER_URL = "ws://localhost:8085";
 
 describe("Trading System Tests", () => {
   let ws;
@@ -74,6 +74,8 @@ describe("Trading System Tests", () => {
       })
     );
 
+    const promisified = waitForWSMessage()
+
     const buyOrderResponse = await axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId,
       stockSymbol: symbol,
@@ -82,7 +84,7 @@ describe("Trading System Tests", () => {
       stockType: "yes",
     });
 
-    const wsMessage = await waitForWSMessage();
+    const wsMessage = await promisified;
 
     expect(buyOrderResponse.status).toBe(200);
     expect(wsMessage.event).toBe("event_orderbook_update");
@@ -116,6 +118,8 @@ describe("Trading System Tests", () => {
       })
     );
 
+
+    const promisified = waitForWSMessage()
     const sellOrderResponse = await axios.post(
       `${HTTP_SERVER_URL}/order/sell`,
       {
@@ -127,7 +131,7 @@ describe("Trading System Tests", () => {
       }
     );
 
-    const wsMessage = await waitForWSMessage();
+    const wsMessage = await promisified;
 
     expect(sellOrderResponse.status).toBe(200);
     expect(wsMessage.event).toBe("event_orderbook_update");
@@ -165,6 +169,7 @@ describe("Trading System Tests", () => {
 
     await ws.send(JSON.stringify({ type: "subscribe", stockSymbol: symbol }));
 
+    const promisified = waitForWSMessage()
     await axios.post(`${HTTP_SERVER_URL}/order/sell`, {
       userId: sellerId,
       stockSymbol: symbol,
@@ -173,7 +178,10 @@ describe("Trading System Tests", () => {
       stockType: "yes",
     });
 
-    await waitForWSMessage();
+    
+    await promisified;
+
+    const promisified2 = waitForWSMessage()
 
     await axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId: buyerId,
@@ -183,7 +191,7 @@ describe("Trading System Tests", () => {
       stockType: "yes",
     });
 
-    const executionWsMessage = await waitForWSMessage();
+    const executionWsMessage = await promisified2
 
     expect(executionWsMessage.event).toBe("event_orderbook_update");
     expect(executionWsMessage.yes?.[price / 100]).toBeUndefined();
@@ -220,6 +228,8 @@ describe("Trading System Tests", () => {
 
     await ws.send(JSON.stringify({ type: "subscribe", stockSymbol: symbol }));
 
+    const promisified = waitForWSMessage();
+
     await axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId: buyerId,
       stockSymbol: symbol,
@@ -228,7 +238,9 @@ describe("Trading System Tests", () => {
       stockType: "yes",
     });
 
-    await waitForWSMessage();
+    await promisified
+
+    const promisified2 = waitForWSMessage()
 
     await axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId: buyer2Id,
@@ -238,7 +250,8 @@ describe("Trading System Tests", () => {
       stockType: "no",
     });
 
-    const executionWsMessage = await waitForWSMessage();
+    const executionWsMessage = await promisified2
+
     const message = JSON.parse(executionWsMessage.message);
 
     expect(executionWsMessage.event).toBe("event_orderbook_update");
@@ -280,6 +293,8 @@ describe("Trading System Tests", () => {
     });
 
     await ws.send(JSON.stringify({ type: "subscribe", stockSymbol: symbol }));
+    
+    const promisified = waitForWSMessage()
 
     axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId: buyerId,
@@ -289,8 +304,9 @@ describe("Trading System Tests", () => {
       stockType: "yes",
     });
 
-    await waitForWSMessage();
+    await promisified;
 
+    const promisified2 = waitForWSMessage()
     axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId: buyer2Id,
       stockSymbol: symbol,
@@ -299,8 +315,9 @@ describe("Trading System Tests", () => {
       stockType: "yes",
     });
 
-    await waitForWSMessage();
+    await promisified2;
 
+    const promisified3 = waitForWSMessage()
     axios.post(`${HTTP_SERVER_URL}/order/buy`, {
       userId: buyer3Id,
       stockSymbol: symbol,
@@ -310,7 +327,7 @@ describe("Trading System Tests", () => {
     });
 
     console.log((1000 - price) * (2 * quantity + 30));
-    const executionWsMessage = await waitForWSMessage();
+    const executionWsMessage = await promisified3;
     const message = JSON.parse(executionWsMessage.message);
 
     expect(executionWsMessage.event).toBe("event_orderbook_update");
@@ -396,6 +413,8 @@ describe("Trading System Tests", () => {
 
     await ws.send(JSON.stringify({ type: "subscribe", stockSymbol: symbol }));
 
+    const promisified = waitForWSMessage()
+
     await axios.post(`${HTTP_SERVER_URL}/order/sell`, {
       userId: seller1Id,
       stockSymbol: symbol,
@@ -404,8 +423,9 @@ describe("Trading System Tests", () => {
       stockType: "yes",
     });
 
-    await waitForWSMessage();
+    await promisified;
 
+    const promisified2 = waitForWSMessage()
     await axios.post(`${HTTP_SERVER_URL}/order/sell`, {
       userId: seller2Id,
       stockSymbol: symbol,
@@ -414,7 +434,9 @@ describe("Trading System Tests", () => {
       stockType: "no",
     });
 
-    await waitForWSMessage();
+    await promisified2;
+
+    const promisified3 =waitForWSMessage()
 
     await axios.post(`${HTTP_SERVER_URL}/order/sell`, {
       userId: seller3Id,
@@ -424,7 +446,7 @@ describe("Trading System Tests", () => {
       stockType: "no",
     });
 
-    const executionWsMessage = await waitForWSMessage();
+    const executionWsMessage = await promisified3;
     const message = JSON.parse(executionWsMessage.message);
 
     expect(executionWsMessage.event).toBe("event_orderbook_update");

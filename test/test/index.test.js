@@ -1,8 +1,8 @@
 const axios = require("axios");
 const WebSocket = require("ws");
 
-const HTTP_SERVER_URL = "http://localhost:3005";
-const WS_SERVER_URL = "ws://localhost:8085";
+const HTTP_SERVER_URL = process.env.HTTP_URL;
+const WS_SERVER_URL = process.env.WS_URL;
 
 describe("Trading System Tests", () => {
   let ws;

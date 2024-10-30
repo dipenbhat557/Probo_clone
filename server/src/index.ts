@@ -13,29 +13,14 @@ app.use(express.json());
 
 app.use("/", someRoutes);
 
-export const ws = new WebSocket("ws://localhost:8080");
-
-ws.on("open", () => {
-  console.log("Connected to the websocket Hurrayyy!!");
-});
-
-ws.on("message", (message) => {
-  const data = JSON.parse(message.toString());
-  console.log("Parsed data from server websocket : ", data);
-});
-
-ws.on("close", () => {
-  console.log("Connection closed successfully");
-});
-
 async function startServer() {
   try {
     await redisClient.connect();
     await subscriber.connect();
     console.log("Connected to Redis");
 
-    app.listen(3000, () => {
-      console.log("Server is running on port 3000");
+    app.listen(3005, () => {
+      console.log("Server is running on port 3005");
     });
   } catch (error) {
     console.error("Failed to connect to Redis", error);

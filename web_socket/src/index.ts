@@ -3,7 +3,7 @@ import express from "express";
 import { createClient } from "redis";
 
 const app = express();
-const httpServer = app.listen(8080);
+const httpServer = app.listen(8085);
 const wss = new WebSocketServer({ server: httpServer });
 const redisClient = createClient();
 const redisPublisher = createClient();
@@ -75,26 +75,3 @@ async function startServer() {
 }
 
 startServer();
-;
-
-// wss.on('connection', (ws: WebSocket) => {
-//     console.log("Client connected");
-
-//     ws.send(JSON.stringify({  orderbook: {} }));
-
-//     ws.on('message', (message)=> {
-//         const data = JSON.stringify({
-//             orderbook: message.toString()
-//         });
-
-//         wss.clients.forEach(client => {
-//             if (client.readyState === WebSocket.OPEN) {
-//                 client.send(data);
-//             }
-//         });
-//     });
-
-//     ws.on('close', () => {
-//         console.log("Client disconnected");
-//     });
-// });
